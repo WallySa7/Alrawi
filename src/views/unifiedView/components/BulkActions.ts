@@ -255,8 +255,8 @@ export class BulkActions {
 		// Get all available tags based on content type
 		const allTags: string[] =
 			this.props.contentType === CONTENT_TYPE.VIDEOS
-				? await this.props.dataService.getExistingTags()
-				: await this.props.dataService.getExistingTags("books");
+				? await this.props.dataService.getTags()
+				: await this.props.dataService.getTags("books");
 
 		// Add existing tags as options (up to 10)
 		allTags.slice(0, 10).forEach((tag) => {
@@ -564,14 +564,11 @@ export class BulkActions {
 		let allCategories: string[] = [];
 
 		if (this.props.contentType === CONTENT_TYPE.VIDEOS) {
-			allCategories =
-				await this.props.dataService.getExistingVideoCategories();
+			allCategories = await this.props.dataService.getVideoCategories();
 		} else if (this.props.contentType === CONTENT_TYPE.BOOKS) {
-			allCategories =
-				await this.props.dataService.getExistingBookCategories();
+			allCategories = await this.props.dataService.getBookCategories();
 		} else if (this.props.contentType === CONTENT_TYPE.BENEFITS) {
-			allCategories =
-				await this.props.dataService.getExistingBenefitCategories();
+			allCategories = await this.props.dataService.getBenefitCategories();
 		}
 
 		// Show suggestions
@@ -699,7 +696,7 @@ export class BulkActions {
 				let updatedCategories: string[] = [];
 
 				// Get item type
-				const itemInfo = await this.props.dataService.getNoteType(
+				const itemInfo = await this.props.dataService.getContentType(
 					filePath
 				);
 

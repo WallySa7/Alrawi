@@ -61,6 +61,8 @@ export interface PlaylistItem {
     /** Associated tags */
     tags?: string[];
     categories?: string[];
+    /** YouTube playlist ID */
+    playlistId?: string;
 }
 
 /**

@@ -306,7 +306,7 @@ export class SharedUtils {
 		});
 
 		// Get all available tags
-		const allTags = await dataService.getExistingTags(
+		const allTags = await dataService.getTags(
 			contentType === "books" ? "books" : undefined
 		);
 
@@ -375,7 +375,7 @@ export class SharedUtils {
 		// Save action
 		saveButton.addEventListener("click", async () => {
 			if ("filePath" in item) {
-				await dataService.updateItemTags(item.filePath, selectedTags);
+				await dataService.updateTags(item.filePath, selectedTags);
 			} else {
 				console.error("Item does not have a filePath property.");
 			}
@@ -542,11 +542,11 @@ export class SharedUtils {
 		// Get category suggestions from dataService
 		let allCategories: string[] = [];
 		if (contentType === "videos") {
-			allCategories = await dataService.getExistingVideoCategories();
+			allCategories = await dataService.getVideoCategories();
 		} else if (contentType === "books") {
-			allCategories = await dataService.getExistingBookCategories();
+			allCategories = await dataService.getBookCategories();
 		} else if (contentType === "benefits") {
-			allCategories = await dataService.getExistingBenefitCategories();
+			allCategories = await dataService.getBenefitCategories();
 		}
 
 		// Show suggestions
@@ -657,7 +657,7 @@ export class SharedUtils {
 		select.addEventListener("change", async () => {
 			const newStatus = select.value;
 
-			await dataService.updateItemStatus(item.filePath, newStatus);
+			await dataService.updateStatus(item.filePath, newStatus);
 
 			// Update only the status class without full re-render
 			select.className = `alrawi-status-select status-${newStatus

@@ -346,7 +346,7 @@ export class BookCard {
 								si.setTitle(status)
 									.setChecked(book.status === status)
 									.onClick(async () => {
-										await this.props.dataService.updateItemStatus(
+										await this.props.dataService.updateStatus(
 											book.filePath,
 											status
 										);
@@ -598,7 +598,7 @@ export class BookCard {
 					newProgress >= book.pages &&
 					book.status !== "تمت القراءة"
 				) {
-					await this.props.dataService.updateItemStatus(
+					await this.props.dataService.updateStatus(
 						book.filePath,
 						"تمت القراءة"
 					);
@@ -616,7 +616,7 @@ export class BookCard {
 					newProgress < book.pages &&
 					book.status !== "قيد القراءة"
 				) {
-					await this.props.dataService.updateItemStatus(
+					await this.props.dataService.updateStatus(
 						book.filePath,
 						"قيد القراءة"
 					);

@@ -104,7 +104,7 @@ export class BenefitCard {
 
 		// Add count badge to show number of benefits in this source
 		this.props.dataService
-			.countBenefitsInSource(benefit.sourcePath)
+			.countBenefits(benefit.sourcePath)
 			.then((count) => {
 				if (count > 1) {
 					sourceTitle.createEl("span", {

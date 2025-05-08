@@ -549,7 +549,7 @@ export class BookTable {
 
 				// Check if book status needs to be updated (now complete)
 				if (newValue >= book.pages && book.status !== "تمت القراءة") {
-					await this.props.dataService.updateItemStatus(
+					await this.props.dataService.updateStatus(
 						book.filePath,
 						"تمت القراءة"
 					);
@@ -572,7 +572,7 @@ export class BookTable {
 					newValue < book.pages &&
 					book.status === "تمت القراءة"
 				) {
-					await this.props.dataService.updateItemStatus(
+					await this.props.dataService.updateStatus(
 						book.filePath,
 						"قيد القراءة"
 					);
@@ -742,7 +742,7 @@ export class BookTable {
 								si.setTitle(status)
 									.setChecked(book.status === status)
 									.onClick(async () => {
-										await this.props.dataService.updateItemStatus(
+										await this.props.dataService.updateStatus(
 											book.filePath,
 											status
 										);
@@ -994,7 +994,7 @@ export class BookTable {
 					newProgress >= book.pages &&
 					book.status !== "تمت القراءة"
 				) {
-					await this.props.dataService.updateItemStatus(
+					await this.props.dataService.updateStatus(
 						book.filePath,
 						"تمت القراءة"
 					);
@@ -1012,7 +1012,7 @@ export class BookTable {
 					newProgress < book.pages &&
 					book.status !== "قيد القراءة"
 				) {
-					await this.props.dataService.updateItemStatus(
+					await this.props.dataService.updateStatus(
 						book.filePath,
 						"قيد القراءة"
 					);

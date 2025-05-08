@@ -289,12 +289,12 @@ export class UnifiedView extends ItemView {
 			if (this.data.videos.length === 0 || forceRefresh) {
 				// Load videos and playlists
 				const videoData =
-					await this.dataService.loadVideosAndPlaylists();
+					await this.dataService.getVideosAndPlaylists();
 				this.data.videos = videoData.videos;
 				this.data.playlists = videoData.playlists;
 				this.data.presenters = videoData.presenters;
 				this.data.categories.videos = videoData.categories;
-				this.data.tags.videos = await this.dataService.getExistingTags(
+				this.data.tags.videos = await this.dataService.getTags(
 					"videos"
 				);
 
@@ -310,15 +310,11 @@ export class UnifiedView extends ItemView {
 		} else if (this.contentType === CONTENT_TYPE.BOOKS) {
 			if (this.data.books.length === 0 || forceRefresh) {
 				// Load books
-				const bookData = await this.dataService.getCachedBooks(
-					forceRefresh
-				);
+				const bookData = await this.dataService.getBooks(forceRefresh);
 				this.data.books = bookData.books;
 				this.data.authors = bookData.authors;
 				this.data.categories.books = bookData.categories;
-				this.data.tags.books = await this.dataService.getExistingTags(
-					"books"
-				);
+				this.data.tags.books = await this.dataService.getTags("books");
 
 				this.filterState.setAvailableBookOptions({
 					statuses:

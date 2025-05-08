@@ -338,7 +338,7 @@ export class VideoCard {
 								si.setTitle(status)
 									.setChecked(item.status === status)
 									.onClick(async () => {
-										await this.props.dataService.updateItemStatus(
+										await this.props.dataService.updateStatus(
 											item.filePath,
 											status
 										);

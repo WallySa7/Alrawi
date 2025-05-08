@@ -554,7 +554,7 @@ export class FilterBar {
 	): Promise<void> {
 		try {
 			const sourcesWithCounts =
-				await this.props.dataService.getSourcesWithBenefitsCount();
+				await this.props.dataService.getBenefitSources();
 			const sourceMap = new Map(
 				sourcesWithCounts.map((s) => [s.path, s.title])
 			);
@@ -1157,7 +1157,7 @@ export class FilterBar {
 
 		// Get sources with counts
 		const sourcesWithCounts =
-			await this.props.dataService.getSourcesWithBenefitsCount();
+			await this.props.dataService.getBenefitSources();
 		const benefitFilterState = this.props.filterState.getBenefitsState();
 
 		// Get available sources when dynamic filtering is enabled
