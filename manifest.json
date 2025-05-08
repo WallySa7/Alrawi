@@ -1,0 +1,10 @@
+{
+	"id": "Alrawi-plugin",
+	"name": "Alrawii",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Videos and Books",
+	"author": "Abdulrahman alwesabi",
+	"authorUrl": "https://github.com/WallySa7",
+	"isDesktopOnly": false
+  }
