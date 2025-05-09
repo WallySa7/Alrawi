@@ -1186,28 +1186,8 @@ export class FilterBar {
 		});
 		optionsContainer.style.display = "none";
 
-		// Store references for efficient updates
-		this.dropdowns.set(type, selectContainer);
-		this.optionsContainers.set(type, optionsContainer);
-
 		// Special handling for source type options
-		// Use dynamic options if enabled and available
-		const sourceTypes = this.props.useDynamicOptions
-			? this.props.filterState.getAvailableOptions(
-					this.props.contentType,
-					"sourceType"
-			  )
-			: ["كتاب", "فيديو"];
-
-		// Ensure selected values are always included
-		const validSourceTypes = [
-			...new Set([
-				...sourceTypes,
-				...selectedValues.map((v) => (v === "book" ? "كتاب" : "فيديو")),
-			]),
-		];
-
-		validSourceTypes.forEach((option) => {
+		["كتاب", "فيديو"].forEach((option) => {
 			const sourceValue = option === "كتاب" ? "book" : "video";
 			const optionEl = optionsContainer.createEl("label", {
 				cls: "alrawi-multi-select-option",
@@ -1235,33 +1215,27 @@ export class FilterBar {
 			});
 		});
 
-		// Search functionality with debounce
-		searchInput.addEventListener(
-			"input",
-			this.debounce(() => {
-				const searchTerm = searchInput.value.toLowerCase();
-				optionsContainer
-					.querySelectorAll(".alrawi-multi-select-option")
-					.forEach((option) => {
-						const text =
-							option
-								.querySelector(
-									".alrawi-multi-select-option-text"
-								)
-								?.textContent?.toLowerCase() || "";
-						const dataValue =
-							option.getAttribute("data-value")?.toLowerCase() ||
-							"";
-						const isVisible =
-							text.includes(searchTerm) ||
-							dataValue.includes(searchTerm);
+		// Search functionality
+		searchInput.addEventListener("input", () => {
+			const searchTerm = searchInput.value.toLowerCase();
+			optionsContainer
+				.querySelectorAll(".alrawi-multi-select-option")
+				.forEach((option) => {
+					const text =
+						option
+							.querySelector(".alrawi-multi-select-option-text")
+							?.textContent?.toLowerCase() || "";
+					const dataValue =
+						option.getAttribute("data-value")?.toLowerCase() || "";
+					const isVisible =
+						text.includes(searchTerm) ||
+						dataValue.includes(searchTerm);
 
-						(option as HTMLElement).style.display = isVisible
-							? "flex"
-							: "none";
-					});
-			}, 100)
-		);
+					(option as HTMLElement).style.display = isVisible
+						? "flex"
+						: "none";
+				});
+		});
 
 		// Toggle dropdown visibility
 		searchInput.addEventListener("click", (e) => {
@@ -1318,47 +1292,13 @@ export class FilterBar {
 		});
 		optionsContainer.style.display = "none";
 
-		// Store references
-		this.dropdowns.set("sources", selectContainer);
-		this.optionsContainers.set("sources", optionsContainer);
-
-		// Show loading indicator while fetching sources
-		const loadingEl = optionsContainer.createEl("div", {
-			cls: "alrawi-loading",
-			text: "جاري تحميل المصادر...",
-		});
-
 		// Get sources with counts
 		const sourcesWithCounts =
 			await this.props.dataService.getBenefitSources();
 		const benefitFilterState = this.props.filterState.getBenefitsState();
 
-		// Get available sources when dynamic filtering is enabled
-		let availableSources = sourcesWithCounts;
-
-		if (this.props.useDynamicOptions) {
-			const dynamicSourcePaths =
-				this.props.filterState.getAvailableOptions(
-					this.props.contentType,
-					"source"
-				);
-
-			// Filter sources to only show those available in the current filter state
-			// and always include selected sources
-			if (dynamicSourcePaths.length > 0) {
-				availableSources = sourcesWithCounts.filter(
-					(source) =>
-						dynamicSourcePaths.includes(source.path) ||
-						benefitFilterState.sources.includes(source.path)
-				);
-			}
-		}
-
-		// Remove loading indicator when done
-		loadingEl.remove();
-
 		// Create options for each source
-		availableSources.forEach((source) => {
+		sourcesWithCounts.forEach((source) => {
 			const optionEl = optionsContainer.createEl("label", {
 				cls: "alrawi-multi-select-option",
 				attr: { "data-value": source.path },
@@ -1398,24 +1338,21 @@ export class FilterBar {
 		});
 
 		// Search functionality
-		searchInput.addEventListener(
-			"input",
-			this.debounce(() => {
-				const searchTerm = searchInput.value.toLowerCase();
-				optionsContainer
-					.querySelectorAll(".alrawi-multi-select-option")
-					.forEach((option) => {
-						const text =
-							option
-								.querySelector(".alrawi-source-title")
-								?.textContent?.toLowerCase() || "";
-						const isVisible = text.includes(searchTerm);
-						(option as HTMLElement).style.display = isVisible
-							? "flex"
-							: "none";
-					});
-			}, 100)
-		);
+		searchInput.addEventListener("input", () => {
+			const searchTerm = searchInput.value.toLowerCase();
+			optionsContainer
+				.querySelectorAll(".alrawi-multi-select-option")
+				.forEach((option) => {
+					const text =
+						option
+							.querySelector(".alrawi-source-title")
+							?.textContent?.toLowerCase() || "";
+					const isVisible = text.includes(searchTerm);
+					(option as HTMLElement).style.display = isVisible
+						? "flex"
+						: "none";
+				});
+		});
 
 		// Toggle dropdown
 		searchInput.addEventListener("click", (e) => {

@@ -362,7 +362,7 @@ export class UnifiedView extends ItemView {
 	/**
 	 * Renders the entire view
 	 */
-	private renderView(): void {
+	public renderView(): void {
 		if (!this.headerContainer) return;
 
 		// Render the header (with content type switching)
