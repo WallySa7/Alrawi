@@ -292,32 +292,51 @@ export class FilterBar {
 		});
 
 		// Type filters
-		filterState.types.forEach((type) => {
-			this.createFilterBadge(filtersList, "النوع", type, () => {
-				const updatedTypes = filterState.types.filter(
-					(t) => t !== type
-				);
-				this.props.filterState.updateVideoAndBookState({
-					types: updatedTypes,
-					page: 1,
+		if (this.props.contentType === CONTENT_TYPE.VIDEOS) {
+			filterState.types.forEach((type) => {
+				this.createFilterBadge(filtersList, "النوع", type, () => {
+					const updatedTypes = filterState.types.filter(
+						(t) => t !== type
+					);
+					this.props.filterState.updateVideoAndBookState({
+						types: updatedTypes,
+						page: 1,
+					});
+					this.props.onFilterChange();
 				});
-				this.props.onFilterChange();
 			});
-		});
+		}
 
 		// Category filters
-		filterState.categories.forEach((category) => {
-			this.createCategoryFilterBadge(filtersList, category, () => {
-				const updatedCategories = filterState.categories.filter(
-					(c) => c !== category
-				);
-				this.props.filterState.updateVideoAndBookState({
-					categories: updatedCategories,
-					page: 1,
+		if (this.props.contentType === CONTENT_TYPE.BOOKS) {
+			// For Books, categories are stored in types
+			filterState.types.forEach((category) => {
+				this.createCategoryFilterBadge(filtersList, category, () => {
+					const updatedTypes = filterState.types.filter(
+						(c) => c !== category
+					);
+					this.props.filterState.updateVideoAndBookState({
+						types: updatedTypes,
+						page: 1,
+					});
+					this.props.onFilterChange();
 				});
-				this.props.onFilterChange();
 			});
-		});
+		} else {
+			// For Videos, use categories field
+			filterState.categories.forEach((category) => {
+				this.createCategoryFilterBadge(filtersList, category, () => {
+					const updatedCategories = filterState.categories.filter(
+						(c) => c !== category
+					);
+					this.props.filterState.updateVideoAndBookState({
+						categories: updatedCategories,
+						page: 1,
+					});
+					this.props.onFilterChange();
+				});
+			});
+		}
 
 		// Tag filters
 		filterState.tags.forEach((tag) => {
@@ -1616,8 +1635,14 @@ export class FilterBar {
 			else if (type === "presenter" || type === "author")
 				updateObj.presenters = selectedValues;
 			else if (type === "type") updateObj.types = selectedValues;
-			else if (type === "category") updateObj.categories = selectedValues;
-			else if (type === "tag") updateObj.tags = selectedValues;
+			// Here's the fix - update the correct field based on content type
+			else if (type === "category") {
+				if (this.props.contentType === CONTENT_TYPE.BOOKS) {
+					updateObj.types = selectedValues; // Update types for books
+				} else {
+					updateObj.categories = selectedValues; // Update categories for videos
+				}
+			} else if (type === "tag") updateObj.tags = selectedValues;
 
 			this.props.filterState.updateVideoAndBookState(updateObj);
 		}
