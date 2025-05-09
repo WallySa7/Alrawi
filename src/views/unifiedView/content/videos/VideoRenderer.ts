@@ -173,8 +173,18 @@ export class VideoRenderer extends BaseContentRenderer<
 			filteredItems = filteredItems.filter(
 				(item) =>
 					item.categories &&
-					item.categories.some((category) =>
-						filterState.categories.includes(category)
+					item.categories.some(
+						(category) =>
+							// Direct match
+							filterState.categories.includes(category) ||
+							// Parent category match (selected parent category matches this category's parent)
+							filterState.categories.some((filterCategory) =>
+								category.startsWith(filterCategory + "/")
+							) ||
+							// Child category match (this category is a parent of selected category)
+							filterState.categories.some((filterCategory) =>
+								filterCategory.startsWith(category + "/")
+							)
 					)
 			);
 		}

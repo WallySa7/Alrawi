@@ -162,8 +162,18 @@ export class BookRenderer extends BaseContentRenderer<
 			filteredBooks = filteredBooks.filter(
 				(book) =>
 					book.categories &&
-					book.categories.some((cat) =>
-						filterState.types.includes(cat)
+					book.categories.some(
+						(category) =>
+							// Direct match
+							filterState.types.includes(category) ||
+							// Parent category match (selected parent category matches this category's parent)
+							filterState.types.some((filterCategory) =>
+								category.startsWith(filterCategory + "/")
+							) ||
+							// Child category match (this category is a parent of selected category)
+							filterState.types.some((filterCategory) =>
+								filterCategory.startsWith(category + "/")
+							)
 					)
 			);
 		}

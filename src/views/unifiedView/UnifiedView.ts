@@ -349,12 +349,10 @@ export class UnifiedView extends ItemView {
 				this.data.categories.benefits = Array.from(categories).sort();
 				this.data.tags.benefits = Array.from(tags).sort();
 
-				const sourcePaths = this.data.benefits.map((b) => b.sourcePath);
-
 				this.filterState.setAvailableBenefitOptions({
 					categories: this.data.categories.benefits || [],
 					sourceTypes: ["book", "video"],
-					sources: sourcePaths,
+					sources: this.data.benefits.map((b) => b.sourcePath),
 					tags: this.data.tags.benefits || [],
 				});
 			}

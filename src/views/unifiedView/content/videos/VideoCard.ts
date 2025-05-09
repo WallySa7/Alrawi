@@ -192,10 +192,12 @@ export class VideoCard {
 			const displayCount = Math.min(3, item.categories.length);
 			for (let i = 0; i < displayCount; i++) {
 				const category = item.categories[i];
-				categoriesContainer.createEl("span", {
+				const categoryElement = categoriesContainer.createEl("span", {
 					cls: "alrawi-card-tag",
-					text: category,
 				});
+
+				// Use the hierarchical category formatter
+				SharedUtils.formatCategoryForDisplay(category, categoryElement);
 
 				// Add separator except for last category
 				if (i < displayCount - 1) {

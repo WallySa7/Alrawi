@@ -188,12 +188,32 @@ export class BookCard {
 				cls: "alrawi-card-info",
 			});
 			setIcon(categoriesInfo, "folder");
-			categoriesInfo.createEl("span", {
-				text: Array.isArray(book.categories)
-					? book.categories.slice(0, 3).join(", ") +
-					  (book.categories.length > 3 ? "..." : "")
-					: book.categories,
+
+			const categoriesContainer = categoriesInfo.createEl("div", {
+				cls: "alrawi-tags-container",
 			});
+
+			// Only show a few categories to save space
+			const displayCount = Math.min(3, book.categories.length);
+			for (let i = 0; i < displayCount; i++) {
+				const category = book.categories[i];
+				const categoryElement = categoriesContainer.createEl("span", {
+					cls: "alrawi-card-tag",
+				});
+
+				// Use the hierarchical category formatter
+				SharedUtils.formatCategoryForDisplay(category, categoryElement);
+
+				// Add separator except for last category
+				if (i < displayCount - 1) {
+					categoriesContainer.createEl("span", { text: ", " });
+				}
+			}
+
+			// Show indication if there are more categories
+			if (book.categories.length > displayCount) {
+				categoriesContainer.createEl("span", { text: "..." });
+			}
 		}
 
 		// Tags if available

@@ -391,9 +391,14 @@ export class BookTable {
 												"span",
 												{
 													cls: "alrawi-table-tag-chip",
-													text: category,
 												}
 											);
+
+										// Use the new hierarchical category formatter
+										SharedUtils.formatCategoryForDisplay(
+											category,
+											chip
+										);
 
 										// Add separator except for last category
 										if (index < displayCount - 1) {

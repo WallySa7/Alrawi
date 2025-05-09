@@ -396,10 +396,19 @@ export class VideoTable {
 								item.categories
 									.slice(0, displayCount)
 									.forEach((category, index) => {
-										categoriesContainer.createEl("span", {
-											cls: "alrawi-table-tag-chip",
-											text: category,
-										});
+										const chip =
+											categoriesContainer.createEl(
+												"span",
+												{
+													cls: "alrawi-table-tag-chip",
+												}
+											);
+
+										// Use the new hierarchical category formatter
+										SharedUtils.formatCategoryForDisplay(
+											category,
+											chip
+										);
 
 										// Add separator except for last category
 										if (index < displayCount - 1) {

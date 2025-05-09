@@ -48,6 +48,15 @@ export class DataService {
 	}
 
 	/**
+	 * Gets data for a specific video or playlist
+	 * @param filePath - Path to the video file
+	 * @returns Video or playlist data or null if not found
+	 */
+	async getVideoData(filePath: string) {
+		return this.videoService.getVideoData(filePath);
+	}
+
+	/**
 	 * Creates a new video note
 	 * @param data - Video data
 	 * @returns Whether creation was successful

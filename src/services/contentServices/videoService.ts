@@ -133,6 +133,95 @@ export class VideoService extends BaseDataService {
 	}
 
 	/**
+	 * Gets data for a specific video or playlist
+	 * @param filePath - Path to the video file
+	 * @returns Video or playlist data or null if not found
+	 */
+	async getVideoData(
+		filePath: string
+	): Promise<VideoItem | PlaylistItem | null> {
+		try {
+			const file = this.app.vault.getAbstractFileByPath(filePath);
+			if (!(file instanceof TFile)) return null;
+
+			const content = await this.app.vault.read(file);
+			const cache = this.app.metadataCache.getFileCache(file);
+
+			if (!cache?.frontmatter) return null;
+			const fm = cache.frontmatter;
+
+			// Process categories and tags
+			const categories = this.normalizeTags(fm["التصنيفات"]);
+			const tags = this.normalizeTags(fm["الوسوم"]);
+
+			// Check if it's a video or playlist
+			const type = fm["النوع"] || "مقطع";
+			const isPlaylist = type === "سلسلة" || type === "قائمة";
+
+			if (isPlaylist) {
+				// Return playlist data
+				return {
+					title: fm["title"] || file.basename,
+					presenter: fm["الملقي"] || this.settings.defaultPresenter,
+					itemCount: parseInt(fm["عدد المقاطع"]) || 0,
+					duration: fm["المدة الإجمالية"] || "00:00:00",
+					url:
+						fm["رابط القائمة"] ||
+						fm["رابط السلسلة"] ||
+						fm["رابط"] ||
+						"",
+					playlistId: fm["معرف السلسلة"] || fm["معرف القائمة"] || "",
+					filePath: file.path,
+					type,
+					status:
+						fm["الحالة"] ||
+						this.settings.progressTracking.defaultStatus,
+					dateAdded:
+						fm["تاريخ الإضافة"] ||
+						formatDate(
+							new Date(file.stat.ctime),
+							this.settings.dateFormat
+						),
+					categories,
+					tags,
+					thumbnailUrl: fm["الصورة المصغرة"] || "",
+				};
+			} else {
+				// Return video data
+				const duration = fm["المدة"] || "00:00:00";
+				const [h = 0, m = 0, s = 0] = duration.split(":").map(Number);
+				const durationSeconds = h * 3600 + m * 60 + s;
+
+				return {
+					title: fm["title"] || file.basename,
+					presenter: fm["الملقي"] || this.settings.defaultPresenter,
+					duration,
+					durationSeconds,
+					url: fm["رابط"] || "",
+					videoId: fm["معرف الفيديو"] || "",
+					thumbnailUrl: fm["الصورة المصغرة"] || "",
+					filePath: file.path,
+					type,
+					status:
+						fm["الحالة"] ||
+						this.settings.progressTracking.defaultStatus,
+					dateAdded:
+						fm["تاريخ الإضافة"] ||
+						formatDate(
+							new Date(file.stat.ctime),
+							this.settings.dateFormat
+						),
+					categories,
+					tags,
+				};
+			}
+		} catch (error) {
+			console.error("Error getting video data:", error);
+			return null;
+		}
+	}
+
+	/**
 	 * Creates a new video note
 	 * @param data - Video data to create
 	 * @returns Whether creation was successful

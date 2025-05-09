@@ -307,7 +307,7 @@ export class FilterBar {
 
 		// Category filters
 		filterState.categories.forEach((category) => {
-			this.createFilterBadge(filtersList, "التصنيف", category, () => {
+			this.createCategoryFilterBadge(filtersList, category, () => {
 				const updatedCategories = filterState.categories.filter(
 					(c) => c !== category
 				);
@@ -415,7 +415,7 @@ export class FilterBar {
 
 		// Category filters
 		benefitFilterState.categories.forEach((category) => {
-			this.createFilterBadge(filtersList, "التصنيف", category, () => {
+			this.createCategoryFilterBadge(filtersList, category, () => {
 				const updatedCategories = benefitFilterState.categories.filter(
 					(c) => c !== category
 				);
@@ -631,6 +631,67 @@ export class FilterBar {
 	}
 
 	/**
+	 * Creates a filter badge for category filters, handling hierarchical categories
+	 * @param container - Container element to add badge to
+	 * @param category - Category value
+	 * @param onClick - Click handler for removing category
+	 * @returns Created badge element
+	 */
+	private createCategoryFilterBadge(
+		container: HTMLElement,
+		category: string,
+		onClick: () => void
+	): HTMLElement {
+		if (category.includes("/")) {
+			// Handle hierarchical category
+			const [parent, ...childParts] = category.split("/");
+			const child = childParts.join("/");
+
+			const badge = container.createEl("div", {
+				cls: "alrawi-filter-badge alrawi-hierarchical-category",
+			});
+
+			badge.createEl("span", {
+				cls: "alrawi-filter-badge-label",
+				text: "التصنيف:",
+			});
+
+			const valueSpan = badge.createEl("span", {
+				cls: "alrawi-filter-badge-value",
+			});
+			valueSpan.createEl("span", {
+				cls: "alrawi-filter-badge-parent",
+				text: parent,
+			});
+			valueSpan.createEl("span", { text: "/" });
+			valueSpan.createEl("span", {
+				cls: "alrawi-filter-badge-child",
+				text: child,
+			});
+
+			badge
+				.createEl("button", {
+					cls: "alrawi-filter-badge-remove",
+					text: "×",
+				})
+				.addEventListener("click", (e) => {
+					e.stopPropagation();
+					onClick();
+				});
+
+			return badge;
+		} else {
+			// Regular category
+			return this.createFilterBadge(
+				container,
+				"التصنيف",
+				category,
+				onClick
+			);
+		}
+	}
+
+	/**
 	 * Creates a standard filter badge
 	 * @param container - Container element to add badge to
 	 * @param label - Badge label
@@ -737,7 +798,7 @@ export class FilterBar {
 			];
 		}
 
-		// For tags, we'll handle them hierarchically
+		// For tags and categories, we'll handle them hierarchically
 		if (type === "tag") {
 			this.renderHierarchicalTagOptions(
 				optionsContainer,
@@ -745,8 +806,15 @@ export class FilterBar {
 				selectedValues,
 				type
 			);
+		} else if (type === "category") {
+			this.renderHierarchicalCategoryOptions(
+				optionsContainer,
+				validOptions,
+				selectedValues,
+				type
+			);
 		} else {
-			// For non-tag filters, use the flat implementation
+			// For other filters, use the flat implementation
 			this.renderFlatOptions(
 				optionsContainer,
 				validOptions,
@@ -921,6 +989,92 @@ export class FilterBar {
 							this.handleCheckboxChange(
 								childCheckbox,
 								fullChildTag,
+								selectedValues,
+								type
+							);
+						});
+					});
+				}
+			});
+	}
+
+	/**
+	 * Renders hierarchical category options
+	 * @param container - Container for options
+	 * @param options - Available options
+	 * @param selectedValues - Currently selected values
+	 * @param type - Filter type
+	 */
+	private renderHierarchicalCategoryOptions(
+		container: HTMLElement,
+		options: string[],
+		selectedValues: string[],
+		type: string
+	): void {
+		// Create a hierarchical structure using SharedUtils helper
+		const categoryHierarchy = this.organizeHierarchicalCategories(options);
+
+		// Iterate through top-level categories first
+		Object.keys(categoryHierarchy)
+			.sort()
+			.forEach((parentCategory) => {
+				// Add parent category option
+				const parentOptionEl = container.createEl("label", {
+					cls: "alrawi-multi-select-option alrawi-parent-category",
+					attr: { "data-value": parentCategory },
+				});
+
+				const parentCheckbox = parentOptionEl.createEl("input", {
+					type: "checkbox",
+					value: parentCategory,
+				});
+				parentCheckbox.checked =
+					selectedValues.includes(parentCategory);
+
+				parentOptionEl.createEl("span", {
+					text: parentCategory,
+					cls: "alrawi-multi-select-option-text",
+				});
+
+				// Handle checkbox change without closing dropdown
+				parentCheckbox.addEventListener("change", (e) => {
+					e.stopPropagation();
+					this.handleCheckboxChange(
+						parentCheckbox,
+						parentCategory,
+						selectedValues,
+						type
+					);
+				});
+
+				// If this parent has children, add them with indentation
+				const children = categoryHierarchy[parentCategory];
+				if (children && children.length > 0) {
+					children.sort().forEach((childCategory: any) => {
+						const fullChildCategory = `${parentCategory}/${childCategory}`;
+						const childOptionEl = container.createEl("label", {
+							cls: "alrawi-multi-select-option alrawi-child-category",
+							attr: { "data-value": fullChildCategory },
+						});
+
+						const childCheckbox = childOptionEl.createEl("input", {
+							type: "checkbox",
+							value: fullChildCategory,
+						});
+						childCheckbox.checked =
+							selectedValues.includes(fullChildCategory);
+
+						childOptionEl.createEl("span", {
+							text: `${childCategory}`,
+							cls: "alrawi-multi-select-option-text",
+						});
+
+						// Handle checkbox change
+						childCheckbox.addEventListener("change", (e) => {
+							e.stopPropagation();
+							this.handleCheckboxChange(
+								childCheckbox,
+								fullChildCategory,
 								selectedValues,
 								type
 							);
@@ -1565,6 +1719,38 @@ export class FilterBar {
 	}
 
 	/**
+	 * Organizes categories into a hierarchical structure
+	 * @param categories - Flat array of categories
+	 * @returns Object mapping parent categories to arrays of child categories
+	 */
+	private organizeHierarchicalCategories(categories: string[]): {
+		[key: string]: string[];
+	} {
+		const categoryHierarchy: { [key: string]: string[] } = {};
+
+		categories.forEach((category) => {
+			const parts = category.split("/");
+			if (parts.length > 1) {
+				// This is a hierarchical category
+				const parent = parts[0];
+				const child = parts.slice(1).join("/"); // In case there are deeper hierarchies
+
+				if (!categoryHierarchy[parent]) {
+					categoryHierarchy[parent] = [];
+				}
+				categoryHierarchy[parent].push(child);
+			} else {
+				// Top-level category
+				if (!categoryHierarchy[category]) {
+					categoryHierarchy[category] = [];
+				}
+			}
+		});
+
+		return categoryHierarchy;
+	}
+
+	/**
 	 * Updates filter options based on dynamic filtering
 	 */
 	private updateFilterOptions(): void {
@@ -1611,6 +1797,13 @@ export class FilterBar {
 			// Render new options
 			if (type === "tag") {
 				this.renderHierarchicalTagOptions(
+					container,
+					mergedOptions,
+					selectedValues,
+					type
+				);
+			} else if (type === "category") {
+				this.renderHierarchicalCategoryOptions(
 					container,
 					mergedOptions,
 					selectedValues,

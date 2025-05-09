@@ -68,6 +68,37 @@ export class SharedUtils {
 	}
 
 	/**
+	 * Formats a category for display, handling hierarchical structure
+	 * @param category - Category string
+	 * @param element - Element to add category content to
+	 */
+	public static formatCategoryForDisplay(
+		category: string,
+		element: HTMLElement
+	): void {
+		if (category.includes("/")) {
+			// Hierarchical category
+			const [parent, ...childParts] = category.split("/");
+			const child = childParts.join("/");
+
+			element.addClass("alrawi-hierarchical-category");
+
+			const parentSpan = element.createEl("span", {
+				cls: "alrawi-category-parent",
+				text: parent,
+			});
+			element.createEl("span", { text: "/" });
+			const childSpan = element.createEl("span", {
+				cls: "alrawi-category-child",
+				text: child,
+			});
+		} else {
+			// Regular category
+			element.textContent = category;
+		}
+	}
+
+	/**
 	 * Show generic confirmation dialog for item deletion
 	 * @param item - Item to delete
 	 * @param onConfirm - Callback when deletion is confirmed
@@ -461,7 +492,28 @@ export class SharedUtils {
 				const chip = currentCategoriesContainer.createEl("div", {
 					cls: "alrawi-category-chip",
 				});
-				chip.createEl("span", { text: category });
+
+				if (category.includes("/")) {
+					// Hierarchical category
+					const [parent, ...childParts] = category.split("/");
+					const child = childParts.join("/");
+
+					const categoryContent = chip.createEl("span", {
+						cls: "alrawi-hierarchical-category",
+					});
+					categoryContent.createEl("span", {
+						cls: "alrawi-category-parent",
+						text: parent,
+					});
+					categoryContent.createEl("span", { text: "/" });
+					categoryContent.createEl("span", {
+						cls: "alrawi-category-child",
+						text: child,
+					});
+				} else {
+					chip.createEl("span", { text: category });
+				}
+
 				const removeBtn = chip.createEl("span", {
 					text: "×",
 					cls: "alrawi-category-remove",
